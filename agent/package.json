@@ -1,0 +1,9 @@
+{
+  "name": "agent",
+  "version": "1.0.0",
+  "main": "agent.js",
+  "dependencies": {
+    "nats": "^2.11.0",
+    "uuid": "^9.0.0"
+  }
+}

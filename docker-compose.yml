@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:8222/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  opa:
+    image: openpolicyagent/opa:latest
+    command: ["run", "--server", "--addr", "0.0.0.0:8181", "/policies"]
+    volumes:
+      - ./policies:/policies:ro
+    ports:
+      - "8181:8181"
+
+  tool-gateway:
+    build:
+      context: ./tool-gateway
+    depends_on:
+      - nats
+      - opa
+    environment:
+      - NATS_URL=nats://nats:4222
+      - OPA_URL=http://opa:8181
+    ports:
+      - "3000:3000"
+
+  agent:
+    build:
+      context: ./agent
+    depends_on:
+      - nats
+    environment:
+      - NATS_URL=nats://nats:4222
